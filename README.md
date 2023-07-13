@@ -16,7 +16,7 @@ It's my first GMod mod, so, it isn't too much yet
 - `purge_infection`: Uninfect everybody
 - `infected_players`: Prints all infected players
 
-## To add/correct:
+## Add/Fix:
 
 - Effects when taking damage
 - Pills addons to remove infection
