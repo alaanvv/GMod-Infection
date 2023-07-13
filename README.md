@@ -1,4 +1,4 @@
-# GMod-Infection
+# Infection
 
 While **infected**, hit the others with a **crowbar** to infect them  
 
