@@ -20,3 +20,5 @@ It's my first GMod mod, so, it isn't too much yet
 
 - Effects when taking damage
 - Pills addons to remove infection
+- Fix Infection via bluetooth (arrow bluetooth)
+- Fix error when taking fall damage
