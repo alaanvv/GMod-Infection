@@ -22,3 +22,4 @@ It's my first GMod mod, so, it isn't too much yet
 - Pills addons to remove infection
 - Fix Infection via bluetooth (arrow bluetooth)
 - Fix error when taking fall damage
+- Dox IP hihihi
