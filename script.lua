@@ -1,122 +1,97 @@
 -- Setup
-POINTS_BY_SEC = 1
+DISINFECT_ON_INFECTING = true
+DISINFECT_ON_DEAD = false
+INFECTION_DPS = 1
+INFECTED_RUNSPEED = 1000
 
-infected_players = {}
-ranking = {}
-
-match_running = false
+infected = {} -- [Player:UserID()] Player
 
 -- Functions
-function infect_player(player)
-  infected_players[player:UserID()] = player
-  player:PrintMessage(HUD_PRINTCENTER, 'You got infected')
-end
-function infect_random_player()
-  local all_players = player.GetHumans()
-  local random_player = all_players[math.floor(math.random(#all_players))]
-  infect_player(random_player)
+function infect(player)
+    infected[player:UserID()] = player
+    player:SetRunSpeed(INFECTED_RUNSPEED)
 
-  return random_player
+    PrintMessage(HUD_PRINTTALK, player:Name() .. ' got infected')
+    player:PrintMessage(HUD_PRINTCENTER, 'You are infected')
 end
-function disinfect_player(player)
-  infected_players[player:UserID()] = nil
-  player:PrintMessage(HUD_PRINTCENTER, 'You got disinfected')
+function infect_random()
+    local all_players = player.GetAll()
+    local random_player = all_players[math.random(#all_players)]
+    infect(random_player)
+end
 
-  if #infected_players == 0 then end_match() end
+function disinfect(player)
+    infected[player:UserID()] = nil
+    player:SetRunSpeed(600)
+
+    player:PrintMessage(HUD_PRINTCENTER, 'You are disinfected')
 end
 function purge_infection()
-  infected_players = {}
-  PrintMessage(HUD_PRINTCENTER, 'Everybody got disinfected')
+    infected = {}
+
+    PrintMessage(HUD_PRINTCENTER, 'Infection purged')
 end
 
 function deal_infection_damage()
-  for _, player in pairs(infected_players) do
-    player:TakeDamage(5, player, player)
-  end
-end
-
-function add_points(player, points)
-  local id = player:UserID()
-  if not ranking[id] then ranking[id] = points
-  else ranking[id] = ranking[id] + points end
-end
-function give_points_to_not_infected()
-  if not match_running then return end
-
-  for _, player in pairs(player.GetAll()) do
-    if not infected_players[player:UserID()] then add_points(player, POINTS_BY_SEC * 5) end
-  end
-end
-
-function end_match()
-  if not match_running then return end
-
-  match_running = false
-
-  show_ranking()
-
-  infected_players = {}
-  ranking = {}
-end
-function show_ranking()
-  for id, points in pairs(ranking) do
-    PrintMessage(HUD_PRINTTALK, Player(id):Name() .. ': ' .. points .. 'pts')
-  end
+    for _, player in pairs(infected) do
+        player:TakeDamage(INFECTION_DPS, player, player)
+    end
 end
 
 -- Console Commands
-concommand.Add('start_match', function(player)
-  if not player:IsAdmin() or match_running then return end
+concommand.Add('infect_random', function(player)
+    if not player:IsAdmin() then
+        return
+    end
 
-  match_running = true
-
-  infected_player = infect_random_player()
-  PrintMessage(HUD_PRINTTALK, player:Name() .. ' got randomly infected!')
-end)
-concommand.Add('end_match', function(player)
-  if not player:IsAdmin() then return end
-
-  end_match()
+    infect_random()
 end)
 concommand.Add('get_infected', function(player)
-  if not player:IsAdmin() then return end
+    if not player:IsAdmin() then
+        return
+    end
 
-  infect_player(player)
+    infect(player)
 end)
 concommand.Add('get_disinfected', function(player)
-  if not player:IsAdmin() then return end
+    if not player:IsAdmin() then
+        return
+    end
 
-  disinfect_player(player)
+    disinfect(player)
 end)
 concommand.Add('purge_infection', function(player)
-  if not player:IsAdmin() then return end
+    if not player:IsAdmin() then
+        return
+    end
 
-  purge_infection()
+    purge_infection()
 end)
 concommand.Add('infected_players', function(player)
-  if not player:IsAdmin() then return end
+    if not player:IsAdmin() then
+        return
+    end
 
-  for _, player in pairs(infected_players) do
-    print(player)
-  end
-end)
-concommand.Add('ranking', function(player)
-  if not player:IsAdmin() then return end
-
-  show_ranking()
+    for _, player in pairs(infected) do
+        print(player:Name())
+    end
 end)
 
 -- Hooks
-hook.Add('PlayerHurt', 'HitByInfectedCrowbar', function(player, attacker)
-  if (not attacker:IsPlayer() or attacker:GetActiveWeapon():GetClass() ~= 'weapon_crowbar' or not infected_players[attacker:UserID()] or infected_players[player:UserID()]) then return end
+hook.Add('EntityTakeDamage', 'HitByInfectedCrowbar', function(player, damageInfo)
+    local attacker = damageInfo:GetAttacker()
+    local weapon = damageInfo:GetInflictor()
 
-  add_points(attacker, POINTS_BY_SEC * 30)
+    if (weapon:GetClass() ~= 'weapon_crowbar' or not infected[attacker:UserID()] or infected[player:UserID()]) then return end
 
-  infect_player(player)
-  attacker:PrintMessage(HUD_PRINTCENTER, 'You infected ' .. player:Name())
+    if DISINFECT_ON_INFECTING then disinfect(attacker) end
+    infect(player)
+
+    attacker:PrintMessage(HUD_PRINTCENTER, 'You infected ' .. player:Name())
 end)
-hook.Add('PostPlayerDeath', 'DisinfectDeadPlayers', disinfect_player)
+hook.Add('PostPlayerDeath', 'DisinfectDeadPlayers', function(player)
+  if DISINFECT_ON_DEAD then disinfect(player) end
+end)
 
 -- Timers
 timer.Create('deal_infection_damage', 1, 0, deal_infection_damage)
-timer.Create('give_points_to_not_infected', 5, 0, give_points_to_not_infected)
