@@ -20,4 +20,3 @@ It's my first GMod mod, so, it isn't too much yet
 
 - Effects when taking damage
 - Pills addons to remove infection
-- Show rank in correct order
