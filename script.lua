@@ -80,9 +80,8 @@ end)
 -- Hooks
 hook.Add('EntityTakeDamage', 'HitByInfectedCrowbar', function(player, damageInfo)
     local attacker = damageInfo:GetAttacker()
-    local weapon = damageInfo:GetInflictor()
-
-    if (weapon:GetClass() ~= 'weapon_crowbar' or not infected[attacker:UserID()] or infected[player:UserID()]) then return end
+    
+    if (not damageInfo:IsDamageType(DMG_CLUB) or not infected[attacker:UserID()] or infected[player:UserID()]) then return end
 
     if DISINFECT_ON_INFECTING then disinfect(attacker) end
     infect(player)
