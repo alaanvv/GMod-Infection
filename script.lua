@@ -1,7 +1,7 @@
 -- Setup
 DISINFECT_ON_INFECTING = true
 DISINFECT_ON_DEAD = false
-INFECTION_DPS = 1
+INFECTION_DPS = 10
 INFECTED_RUNSPEED = 1000
 
 infected = {} -- [Player:UserID()] Player
