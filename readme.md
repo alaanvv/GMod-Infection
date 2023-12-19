@@ -1,8 +1,10 @@
-# Infection
+<div align='center'>
+  <img width='50%' src='https://github.com/alaanvv/Image-Database/blob/main/Misc/spy.png?raw=true'>
+  
+  # Infection
 
-While **infected**, hit the others with a **crowbar** to infect them  
-
-It's my first GMod mod, so, it isn't too much yet  
+  While **infected**, hit the others with a **crowbar** to infect them  
+</div>
 
 ## Usage
 
